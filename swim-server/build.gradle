@@ -1,0 +1,30 @@
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+}
+
+apply plugin: "java"
+apply plugin: 'application'
+
+group = 'swim'
+description = 'Swim example'
+mainClassName = 'swim.basic.BasicPlane'
+ext.swimVersion = project.property('swim.version')
+ext.moduleName = 'swim.basic'
+ext.moduleArgs = []
+
+repositories {
+    maven {
+        url "https://oss.sonatype.org/content/repositories/snapshots/"
+    }
+    mavenCentral()
+}
+
+dependencies {
+    implementation group: 'org.swimos', name: 'swim-server', version: swimVersion
+    implementation group: 'org.swimos', name:'swim-meta', version: swimVersion
+    implementation group: 'org.swimos', name:'swim-client', version: swimVersion
+}
