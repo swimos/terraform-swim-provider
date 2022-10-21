@@ -34,12 +34,12 @@ provider "swim" {
   url = "ws://127.0.0.1:9001/"
 }
 
-resource "swim_endpoint" "state" {
+resource "swim_value_downlink" "state" {
   node = "/unit"
   lane = "state"
   value = docker_container.nginx.id
 }
 
 output "status" {
-  value = swim_endpoint.state
+  value = swim_value_downlink.state
 }

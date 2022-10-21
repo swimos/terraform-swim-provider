@@ -5,7 +5,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	ws "github.com/sacOO7/gowebsocket"
 )
 
 // Swim Provider
@@ -20,20 +19,16 @@ func Provider() *schema.Provider {
 		},
 		// Todo change this
 		ResourcesMap: map[string]*schema.Resource{
-			"swim_endpoint": resourceEndpoint(),
+			"swim_value_downlink": resourceValueDownlink(),
 		},
 		DataSourcesMap:       map[string]*schema.Resource{},
 		ConfigureContextFunc: providerConfigure,
 	}
 }
 
-func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
-	url := d.Get("url").(string)
-
-	//Todo add error check
-	client := ws.New(url)
-	client.Connect()
-
+func providerConfigure(ctx context.Context, data *schema.ResourceData) (interface{}, diag.Diagnostics) {
+	url := data.Get("url").(string)
+	client := SwimClient{url}
 	var diags diag.Diagnostics
 
 	return client, diags
