@@ -56,20 +56,19 @@ func resourceValueDownlinkCreate(ctx context.Context, data *schema.ResourceData,
 	lane := data.Get("lane").(string)
 	value, setValue := data.GetOk("value")
 
-	data.SetId(node + "/" + lane)
-
 	if setValue {
 		diags := client.SetValueDownlink(node, lane, value.(string))
+		if diags == nil {
+			data.SetId(node + "/" + lane)
+		}
 		return diags
 	} else {
 		value, diags := client.GetValueDownlink(node, lane)
-		if diags != nil {
-			return diags
-		} else {
+		if diags == nil {
+			data.SetId(node + "/" + lane)
 			data.Set("value", value)
-			var diags diag.Diagnostics
-			return diags
 		}
+		return diags
 	}
 }
 

@@ -34,12 +34,25 @@ provider "swim" {
   url = "ws://127.0.0.1:9001/"
 }
 
-resource "swim_value_downlink" "state" {
-  node = "/unit"
-  lane = "state"
+resource "swim_value_downlink" "id" {
+  node = "/container"
+  lane = "id"
   value = docker_container.nginx.id
 }
 
-output "status" {
-  value = swim_value_downlink.state
+resource "swim_map_downlink" "ports" {
+  node = "/container"
+  lane = "ports"
+  items = {
+    "external" = docker_container.nginx.ports[0].external
+    "internal" = docker_container.nginx.ports[0].internal
+  }
+}
+
+output "id" {
+  value = swim_value_downlink.id
+}
+
+output "ports" {
+  value = swim_map_downlink.ports
 }

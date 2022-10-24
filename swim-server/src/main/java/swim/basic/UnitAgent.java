@@ -9,48 +9,28 @@ import swim.structure.Value;
 
 public class UnitAgent extends AbstractAgent {
 
-  @SwimLane("state")
-  ValueLane<Value> state = this.<Value>valueLane()
-      .didSet((newValue, oldValue) -> {
-        if(!oldValue.isDefinite()){
-          logMessage("Container id set to " + Recon.toString(newValue));
-        }
-        else
-        {
-          if (newValue.isDefinite()) {
-            logMessage("Container id changed from " + Recon.toString(oldValue) + " to " + Recon.toString(newValue));
-          }
-          else {
-            logMessage("Container id cleared");
-          }
-        }
-      });
+  @SwimLane("id")
+  ValueLane<Value> id = this.<Value>valueLane()
+       .didSet((newValue, oldValue) -> {
+         if (!oldValue.isDefinite()) {
+           logMessage("Container id set to " + Recon.toString(newValue));
+         } else {
+           if (newValue.isDefinite()) {
+             logMessage("Container id changed from " + Recon.toString(oldValue) + " to " + Recon.toString(newValue));
+           } else {
+             logMessage("Container id cleared");
+           }
+         }
+       });
 
-  @SwimLane("cart")
-  MapLane<String, String> cart = this.<String, String>mapLane()
+  @SwimLane("ports")
+  MapLane<String, String> ports = this.<String, String>mapLane()
        .didUpdate((key, newValue, oldValue) -> {
-         logMessage("Item " + key + " value changed to " + newValue + " from " + oldValue);
+         logMessage("Port " + key + " value changed to " + newValue + " from " + oldValue);
        })
        .didRemove((key, oldValue) -> {
-         logMessage("Item removed <" + key + "," + oldValue + ">");
-       });
-
-  @SwimLane("state2")
-  ValueLane<Value> state2 = this.<Value>valueLane()
-       .didSet((newValue, oldValue) -> {
-         if(!oldValue.isDefinite()){
-           logMessage("Container id2 set to " + Recon.toString(newValue));
-         }
-         else
-         {
-           if (newValue.isDefinite()) {
-             logMessage("Container id2 changed from " + Recon.toString(oldValue) + " to " + Recon.toString(newValue));
-           }
-           else {
-             logMessage("Container id2 cleared");
-           }
-         }
-       });
+         logMessage("Port removed <" + key + "," + oldValue + ">");
+       }).didClear(() -> logMessage("All ports removed"));
 
   @Override
   public void didStart() {

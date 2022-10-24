@@ -11,7 +11,7 @@
 basic: @fabric {
   @plane(class: "swim.basic.BasicPlane")
   @node {
-    uri: "/unit"
+    uri: "/container"
     @agent(class: "swim.basic.UnitAgent")
   }
 }

@@ -4,22 +4,34 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/gorilla/websocket"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+)
+
+const (
+	// Time allowed to write a message.
+	writeWait = 5 * time.Second
+	// Time allowed to read a message.
+	readWait = 5 * time.Second
+	// Maximum message size.
+	maxMessageSize = 512
 )
 
 type SwimClient struct {
 	url string
 }
 
-//Todo add deadlines https://github.com/gorilla/websocket/blob/af47554f343b4675b30172ac301638d350db34a5/examples/chat/client.go#L91
-//Todo add error for lane not found
 //Todo refactor duplications
 
 // ------------------- Value Downlink Operations -------------------
 func (client SwimClient) GetValueDownlink(node string, lane string) (string, diag.Diagnostics) {
 	conn, _, err := websocket.DefaultDialer.Dial(client.url, nil)
+	conn.SetReadLimit(maxMessageSize)
+	conn.SetReadDeadline(time.Now().Add(readWait))
+	conn.SetWriteDeadline(time.Now().Add(writeWait))
+
 	defer conn.Close()
 
 	value := ""
@@ -37,17 +49,21 @@ func (client SwimClient) GetValueDownlink(node string, lane string) (string, dia
 
 	for {
 		_, resp, err := conn.ReadMessage()
-		response := string(resp)
 
 		if err != nil {
 			return value, diag.FromErr(err)
 		} else {
+			response := string(resp)
 			if strings.HasPrefix(response, "@event") {
 				re := regexp.MustCompile(`^@event\(.*\)(.*?)$`)
 				match := re.FindStringSubmatch(response)
 				value = string(match[1])
 			} else if strings.HasPrefix(response, "@synced") {
-				return value, nil
+				return value, diag.FromErr(err)
+			} else if strings.HasSuffix(response, "@laneNotFound") {
+				return value, diag.Errorf("Lane %q on node %q not found", lane, node)
+			} else if strings.HasSuffix(response, "@nodeNotFound") {
+				return value, diag.Errorf("Node %q not found", node)
 			}
 		}
 	}
@@ -55,6 +71,9 @@ func (client SwimClient) GetValueDownlink(node string, lane string) (string, dia
 
 func (client SwimClient) SetValueDownlink(node string, lane string, value string) diag.Diagnostics {
 	conn, _, err := websocket.DefaultDialer.Dial(client.url, nil)
+	conn.SetReadLimit(maxMessageSize)
+	conn.SetReadDeadline(time.Now().Add(readWait))
+	conn.SetWriteDeadline(time.Now().Add(writeWait))
 	defer conn.Close()
 
 	if err != nil {
@@ -73,6 +92,9 @@ func (client SwimClient) SetValueDownlink(node string, lane string, value string
 
 func (client SwimClient) ClearValueDownlink(node string, lane string) diag.Diagnostics {
 	conn, _, err := websocket.DefaultDialer.Dial(client.url, nil)
+	conn.SetReadLimit(maxMessageSize)
+	conn.SetReadDeadline(time.Now().Add(readWait))
+	conn.SetWriteDeadline(time.Now().Add(writeWait))
 	defer conn.Close()
 
 	if err != nil {
@@ -92,6 +114,9 @@ func (client SwimClient) ClearValueDownlink(node string, lane string) diag.Diagn
 // ------------------- Map Downlink Operations -------------------
 func (client SwimClient) GetMapDownlink(node string, lane string) (map[string]string, diag.Diagnostics) {
 	conn, _, err := websocket.DefaultDialer.Dial(client.url, nil)
+	conn.SetReadLimit(maxMessageSize)
+	conn.SetReadDeadline(time.Now().Add(readWait))
+	conn.SetWriteDeadline(time.Now().Add(writeWait))
 	defer conn.Close()
 
 	items := make(map[string]string)
@@ -109,17 +134,21 @@ func (client SwimClient) GetMapDownlink(node string, lane string) (map[string]st
 
 	for {
 		_, resp, err := conn.ReadMessage()
-		response := string(resp)
 
 		if err != nil {
 			return items, diag.FromErr(err)
 		} else {
+			response := string(resp)
 			if strings.HasPrefix(response, "@event") {
 				re := regexp.MustCompile(`^@event\(.*\)@update\(key:(.*?)\)(.*?)$`)
 				match := re.FindStringSubmatch(response)
 				items[match[1]] = match[2]
 			} else if strings.HasPrefix(response, "@synced") {
 				return items, nil
+			} else if strings.HasSuffix(response, "@laneNotFound") {
+				return items, diag.Errorf("Lane %q on node %q not found", lane, node)
+			} else if strings.HasSuffix(response, "@nodeNotFound") {
+				return items, diag.Errorf("Node %q not found", node)
 			}
 		}
 	}
@@ -127,6 +156,9 @@ func (client SwimClient) GetMapDownlink(node string, lane string) (map[string]st
 
 func (client SwimClient) SetMapDownlink(node string, lane string, items map[string]interface{}) diag.Diagnostics {
 	conn, _, err := websocket.DefaultDialer.Dial(client.url, nil)
+	conn.SetReadLimit(maxMessageSize)
+	conn.SetReadDeadline(time.Now().Add(readWait))
+	conn.SetWriteDeadline(time.Now().Add(writeWait))
 	defer conn.Close()
 
 	if err != nil {
@@ -154,6 +186,9 @@ func (client SwimClient) SetMapDownlink(node string, lane string, items map[stri
 
 func (client SwimClient) ClearMapDownlink(node string, lane string) diag.Diagnostics {
 	conn, _, err := websocket.DefaultDialer.Dial(client.url, nil)
+	conn.SetReadLimit(maxMessageSize)
+	conn.SetReadDeadline(time.Now().Add(readWait))
+	conn.SetWriteDeadline(time.Now().Add(writeWait))
 	defer conn.Close()
 
 	if err != nil {

@@ -61,20 +61,20 @@ func resourceMapDownlinkCreate(ctx context.Context, data *schema.ResourceData, m
 	lane := data.Get("lane").(string)
 	items, setItems := data.GetOk("items")
 
-	data.SetId(node + "/" + lane)
-
 	if setItems {
 		diags := client.SetMapDownlink(node, lane, items.(map[string]interface{}))
+		if diags == nil {
+			data.SetId(node + "/" + lane)
+		}
 		return diags
 	} else {
 		items, diags := client.GetMapDownlink(node, lane)
-		if diags != nil {
-			return diags
-		} else {
+		if diags == nil {
+			data.SetId(node + "/" + lane)
 			data.Set("items", items)
-			var diags diag.Diagnostics
-			return diags
 		}
+		return diags
+
 	}
 }
 

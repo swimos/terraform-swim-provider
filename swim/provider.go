@@ -16,7 +16,6 @@ func Provider() *schema.Provider {
 				DefaultFunc: schema.EnvDefaultFunc("SWIM_URL", nil),
 			},
 		},
-		// Todo change this
 		ResourcesMap: map[string]*schema.Resource{
 			"swim_value_downlink": resourceValueDownlink(),
 			"swim_map_downlink":   resourceMapDownlink(),
