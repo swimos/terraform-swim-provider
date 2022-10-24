@@ -9,7 +9,6 @@ import (
 
 func resourceValueDownlink() *schema.Resource {
 	return &schema.Resource{
-		//Todo implement all
 		ReadContext:   resourceValueDownlinkRead,
 		CreateContext: resourceValueDownlinkCreate,
 		UpdateContext: resourceValueDownlinkUpdate,
@@ -35,19 +34,19 @@ func resourceValueDownlink() *schema.Resource {
 }
 
 func resourceValueDownlinkRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-    client := meta.(SwimClient)
+	client := meta.(SwimClient)
 
-    node := data.Get("node").(string)
-    lane := data.Get("lane").(string)
+	node := data.Get("node").(string)
+	lane := data.Get("lane").(string)
 
-    value, diags := client.GetValueDownlink(node, lane)
-    if (diags != nil){
-        return diags
-    } else {
-        data.Set("value", value)
-        var diags diag.Diagnostics
-        return diags
-    }
+	value, diags := client.GetValueDownlink(node, lane)
+	if diags != nil {
+		return diags
+	} else {
+		data.Set("value", value)
+		var diags diag.Diagnostics
+		return diags
+	}
 }
 
 func resourceValueDownlinkCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -61,17 +60,16 @@ func resourceValueDownlinkCreate(ctx context.Context, data *schema.ResourceData,
 
 	if setValue {
 		diags := client.SetValueDownlink(node, lane, value.(string))
-		data.Set("value", value)
 		return diags
 	} else {
 		value, diags := client.GetValueDownlink(node, lane)
-        if (diags != nil){
-            return diags
-        } else {
-            data.Set("value", value)
-            var diags diag.Diagnostics
-            return diags
-        }
+		if diags != nil {
+			return diags
+		} else {
+			data.Set("value", value)
+			var diags diag.Diagnostics
+			return diags
+		}
 	}
 }
 

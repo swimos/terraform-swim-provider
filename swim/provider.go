@@ -7,7 +7,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-// Swim Provider
 func Provider() *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
@@ -20,6 +19,7 @@ func Provider() *schema.Provider {
 		// Todo change this
 		ResourcesMap: map[string]*schema.Resource{
 			"swim_value_downlink": resourceValueDownlink(),
+			"swim_map_downlink":   resourceMapDownlink(),
 		},
 		DataSourcesMap:       map[string]*schema.Resource{},
 		ConfigureContextFunc: providerConfigure,
